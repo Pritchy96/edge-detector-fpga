@@ -1,0 +1,9 @@
+#Compiled files, logs, intermediate build files, etc
+*.out
+*.dm
+*.log
+*.vcd
+*.oa
+*.db
+
+bin/*

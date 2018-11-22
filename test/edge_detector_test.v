@@ -1,6 +1,6 @@
 // Testing for Edge Detector
 //
-// Created by Tom Pritchard, November 2016
+// Created by Tom Pritchard, November 2018
 
 module edge_detector_test ();
 
@@ -49,6 +49,14 @@ begin
 
   req = 1;
 end 
+
+always @ (posedge clk) begin
+if (de_req) 
+  begin 
+  #10
+  de_ack = 1; 
+  end
+end
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 /* Set up clock input																						              */

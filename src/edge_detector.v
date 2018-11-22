@@ -34,14 +34,15 @@ initial
     draw_state   = `IDLE;
     ack          = 0;
     more_to_draw = 0;
-    word1        = 32'hx;
-    word2        = 32'hx;
-    word3        = 32'hx;
-    word4        = 32'hx;
+    word1        = 32'hxxxxxxxx;
+    word2        = 32'hxxxxxxxx;
+    word3        = 32'hxxxxxxxx;
+    word4        = 32'hxxxxxxxx;
   end
 
-assign busy   = (draw_state != `IDLE);
-assign de_req = busy && ((more_to_draw != 0) || !de_ack);
+assign busy      = (draw_state != `IDLE);
+assign de_req    = busy && ((more_to_draw != 0) || !de_ack);
+assign need_data = (word1 === 32'hxxxxxxxx) || (word2 === 32'hxxxxxxxx) || (word3 === 32'hxxxxxxxx) || (word4 === 32'hxxxxxxxx);
 
 always @ (posedge clk)
   case (draw_state)
@@ -51,7 +52,7 @@ always @ (posedge clk)
       if (req)  //Wait for request
         begin
         ack <= 1; //Ack start
-        more_to_draw = 1;
+        more_to_draw <= 1;
         
         draw_state <= `SETUP;	
         end
@@ -60,27 +61,28 @@ always @ (posedge clk)
     `SETUP:
       begin
 				$display("State = SETUP.");
-        draw_state <= `DETECTING;	
         if (de_ack) //last pixel read ack'd, start another.
           begin
-          if (word1 == 32'hx) //Check empty
+				  $display("de_ack high.");
+
+          if (word1 === 32'hxxxxxxxx) //Check empty
               begin
-              //readframe
+              read_frame();
               word1 = de_r_data;
               end
-          else if (word2 == 32'hx)
+          else if (word2 === 32'hxxxxxxxx)
               begin
-              //readframe
+              read_frame();
               word2 = de_r_data;
               end
-          else if (word3 == 32'hx)
+          else if (word3 === 32'hxxxxxxxx)
               begin
-              //readframe
+              read_frame();
               word3 = de_r_data;
               end
-          else if (word4 == 32'hx)
+          else if (word4 === 32'hxxxxxxxx)
               begin
-              //readframe
+              read_frame();
               word4 = de_r_data;
               draw_state <= `DETECTING;
               end
@@ -93,14 +95,18 @@ always @ (posedge clk)
       end
   endcase
 
-  // task read_frame(input[17:0] addr, output[31:0] out) begin
-  //   // Set RNW = 1
-  //   // Set de_addr = addr?
+  task read_frame;
+    begin
+
+		$display("Reading Frame.. Honest!");
+
+    // Set RNW = 1
+    // Set de_addr = addr?
 
     
-  //   // read data...somehow..
-
-  // endtask
+    // read data...somehow..
+    end
+  endtask
 
 endmodule
 

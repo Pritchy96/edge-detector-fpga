@@ -67,7 +67,7 @@ always #10 clk = ~clk;
 /* Standard timeout, stopping runaway execution.                              */
 initial 
   begin
-  #1000
+  #10000
   $fclose(file_handle);
   $stop;
   end

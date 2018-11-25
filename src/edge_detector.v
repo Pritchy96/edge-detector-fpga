@@ -95,19 +95,16 @@ always @ (posedge clk)
       end
   endcase
 
+
+
   task read_frame;
     begin
 
 		$display("Reading Frame.. Honest!");
-
     // Set RNW = 1
     // Set de_addr = addr?
-
-    
     // read data...somehow..
     end
   endtask
 
 endmodule
-
-

@@ -42,7 +42,13 @@ always @ (posedge clk) begin
 	$display(file_handle, "Set up input signals.");
   // write_en = 0;
   #10
-  addr = addr + 1;
+
+  if (addr > 71) begin
+    addr = 0;
+  end else begin
+    addr = addr + 1;
+  end
+
   wr_data = wr_data + 1;
   write_en = 1;
 end

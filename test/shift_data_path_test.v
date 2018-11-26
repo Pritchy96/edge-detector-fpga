@@ -7,46 +7,21 @@ module shift_data_path_test ();
 integer file_handle;
 
 reg         clk;
-wire [31:0] p0;
-wire [31:0] p1;
-wire [31:0] p2;
-wire [31:0] p3;
-wire [31:0] p4;
-wire [31:0] p5;
-wire [31:0] p6;
-wire [31:0] p7;
-wire [31:0] p8;
-wire [31:0] p9;
-wire [31:0] p10;
-wire [31:0] p11;
-wire [31:0] p12;
-wire [31:0] p13;
-wire [31:0] p14;
-wire [31:0] p15;
-wire [31:0] p16;
-wire [31:0] p17;
-
+wire [31:0] w0;
+wire [31:0] w1;
+wire [31:0] w2;
+wire [31:0] w3;
+wire [31:0] w4;
+wire [31:0] w5;
 
 //Instantiate module under test
 shift_data_path data_path (.clk(clk),
-                      .p0(p0),
-                      .p1(p1),
-                      .p2(p2),
-                      .p3(p3),
-                      .p4(p4),
-                      .p5(p5),
-                      .p6(p6),
-                      .p7(p7),
-                      .p8(p8),
-                      .p9(p9),
-                      .p10(p10),
-                      .p11(p11),
-                      .p12(p12),
-                      .p13(p13),
-                      .p14(p14),
-                      .p15(p15),
-                      .p16(p16),
-                      .p17(p17));
+                      .w0(w0),
+                      .w1(w1),
+                      .w2(w2),
+                      .w3(w3),
+                      .w4(w4),
+                      .w5(w5));
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 /* Test                                                                       */
@@ -86,8 +61,8 @@ initial
 initial
  begin
  
-  $dumpfile ("shift_data_path.vcd");
-  $dumpvars(0, data_path);
+  $dumpfile ("shift_data_path_test.vcd");
+  $dumpvars(0, shift_data_path_test);
 
  end
 

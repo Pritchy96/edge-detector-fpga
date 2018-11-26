@@ -4,7 +4,7 @@ module shift_32(input  wire        write_en,
                       input  wire [31:0] wr_data,
                       output reg  [31:0] rd_data );
     
-    reg[31:0] memory [71:0];
+    reg[31:0] memory [75:0];
 
     always @ (posedge clk) begin
 		$display("Get clocked son.");

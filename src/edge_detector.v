@@ -95,10 +95,14 @@ always @ (posedge clk)
             //This is on the next clock after setting dstore_write_enable, so set it low.
             dstore_write_enable = 0; 
 
-            //We have written our pixel word, so now read a pixel word.
-            read_frame();
+            //IF AT END OF FRAME BUFFER
+              //STATE = SETUP
+            //ELSE:
+              //We have written our pixel word, so now read a pixel word.
+              read_frame();
+            //END
 
-          end else begin  //Just read a pixel
+          end else begin  //Just read a pixel word, we can write a pixel word back!
           //TODO: If we're async sending jobs to the frame store, how do we know when the read happens?
 
             dstore_write_enable = 1;
@@ -107,7 +111,7 @@ always @ (posedge clk)
       end
   endcase
 
-
+//TODO: Implement this.
   task read_frame;
     begin
 

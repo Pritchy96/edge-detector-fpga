@@ -1,4 +1,7 @@
-module shift_data_path(input  wire        clk,
+module shift_data_path(
+                        input  wire        write_en,
+                        input  wire        clk,
+                        input  wire [31:0] data_in,
                         output wire [31:0] w0,
                         output wire [31:0] w1,
                         output wire [31:0] w2,
@@ -6,17 +9,13 @@ module shift_data_path(input  wire        clk,
                         output wire [31:0] w4,
                         output wire [31:0] w5 );
 
-    reg         write_en;
     reg  [06:0] addr;
-    reg  [31:0] data_in;
     wire [31:0] rd_data;
-    
     wire [31:0] shift_8_line_1_out;
     wire [31:0] shift_32_line_1_out;
     wire [31:0] shift_8_line_2_out;
     wire [31:0] shift_32_line_2_out;
     wire [31:0] shift_8_line_3_out;
-
 
     shift_8_multi_read shift_8_line_1 (.clk(clk),
             .write_en(write_en),
@@ -53,29 +52,15 @@ module shift_data_path(input  wire        clk,
 
     always @ (posedge clk) begin
         if (write_en) begin
-            read_frame;
+            if (addr > 74) begin
+                addr = 0;
+            end else begin
+                addr = addr + 1;
+            end
         end
     end 
 
-    initial begin 
-        write_en = 1;
+    initial begin
         addr = 0;
-        data_in = 0;
-    end 
-
-
-    task read_frame;
-    begin
-
-		$display("Reading Frame.. Honest!");
-        if (addr > 74) begin
-            addr = 0;
-        end else begin
-            addr = addr + 1;
-        end
-
-        data_in = data_in + 1;
     end
-  endtask
-
 endmodule

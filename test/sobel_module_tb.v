@@ -2,7 +2,7 @@
 //
 // Created by Tom Pritchard, November 2018
 
-module sobel_module_test ();
+module sobel_module_tb ();
 
 integer file_handle;
 
@@ -36,7 +36,7 @@ sobel_module sobel (.p0(p0),
 initial
 begin
 
-  file_handle = $fopen("sobel_module_test_out.log"); // Open a message output file
+  file_handle = $fopen("sobel_module_tb_out.log"); // Open a message output file
   $fdisplay(file_handle, "Outcome from Sobel Module tests\n"); // Output title
   
   p0 = 8'h1E;
@@ -67,8 +67,8 @@ initial
 /* //Dump a vcd file for GTKWave.                                             */
 initial
  begin
-  $dumpfile ("sobel_module_test.vcd");
-  $dumpvars(0, sobel_module_test);
+  $dumpfile ("sobel_module_tb.vcd");
+  $dumpvars(0, sobel_module_tb);
  end
 
 endmodule

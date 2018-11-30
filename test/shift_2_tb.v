@@ -2,7 +2,7 @@
 //
 // Created by Tom Pritchard, November 2018
 
-module shift_8_multi_read_test ();
+module shift_2_tb ();
 
 integer file_handle;
 
@@ -14,12 +14,12 @@ wire [31:0] word_1;
 wire [31:0] word_2;
 
 //Instantiate module under test
-shift_8_multi_read shift (.clk(clk),
-                .write_en(write_en),
-                .data_in(data_in),
-                .data_out(data_out),
-                .word_1(word_1),
-                .word_2(word_2));
+shift_2 shift(.clk(clk),
+              .write_en(write_en),
+              .data_in(data_in),
+              .data_out(data_out),
+              .word_1(word_1),
+              .word_2(word_2));
 
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
@@ -27,8 +27,8 @@ shift_8_multi_read shift (.clk(clk),
 
 initial
 begin
-  file_handle = $fopen("shift_8_read_multi_test.log"); // Open a message output file
-  $fdisplay(file_handle, "Outcome from Shift Register 8 Bit Module tests\n"); // Output title
+  file_handle = $fopen("shift_2_tb.log"); // Open a message output file
+  $fdisplay(file_handle, "Outcome from Shift Register 2 deep, 32 bit wide module tests\n"); // Output title
 
   clk = 0;
   data_in = 0;
@@ -39,7 +39,6 @@ end
 
 
 always @ (posedge clk) begin
-	$display(file_handle, "Set up input signals.");
   // write_en = 0;
   #10
   data_in = data_in + 1;
@@ -69,8 +68,8 @@ reg [32:0] idx;
 initial
  begin
  
-  $dumpfile ("shift_8_multi_read_test.vcd");
-  $dumpvars(0, shift_8_multi_read_test);
+  $dumpfile ("shift_2_tb.vcd");
+  $dumpvars(0, shift_2_tb);
   
  end
 

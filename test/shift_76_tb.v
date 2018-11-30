@@ -2,53 +2,54 @@
 //
 // Created by Tom Pritchard, November 2018
 
-module shift_data_path_test ();
+module shift_76_tb ();
 
 integer file_handle;
 
-reg         write_en;
 reg         clk;
-reg  [31:0] data_in;
-wire [31:0] w0;
-wire [31:0] w1;
-wire [31:0] w2;
-wire [31:0] w3;
-wire [31:0] w4;
-wire [31:0] w5;
+reg         write_en;
+reg  [06:0] addr;
+reg  [31:0] wr_data;
+wire [31:0] rd_data;
+
 
 //Instantiate module under test
-shift_data_path data_path (.clk(clk),
-                      .write_en(write_en),
-                      .data_in(data_in),
-                      .w0(w0),
-                      .w1(w1),
-                      .w2(w2),
-                      .w3(w3),
-                      .w4(w4),
-                      .w5(w5));
+shift_76 shift (.clk(clk),
+                .write_en(write_en),
+                .addr(addr),
+                .wr_data(wr_data),
+                .rd_data(rd_data));
+
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 /* Test                                                                       */
 
 initial
 begin
-  file_handle = $fopen("shift_data_path_test.log"); // Open a message output file
-  $fdisplay(file_handle, "Outcome from the Data Path Module tests\n"); // Output title
+  file_handle = $fopen("shift_76_tb.log"); // Open a message output file
+  $fdisplay(file_handle, "Outcome from Shift Register 76 deep, 32 bit wide module tests\n"); // Output title
 
   clk = 0;
+  addr = 0;
+  wr_data = 0;
+  write_en = 1;
+
 	$display(file_handle, "Set up input signals.");
 end
 
 
 always @ (posedge clk) begin
-  if (write_en == 0) begin
-    write_en = 1;
+  // write_en = 0;
+  #10
+
+  if (addr > 71) begin
+    addr = 0;
   end else begin
-    write_en = 0;
+    addr = addr + 1;
   end
 
-  data_in = data_in + 1;
-
+  wr_data = wr_data + 1;
+  write_en = 1;
 end
 
 
@@ -69,12 +70,18 @@ initial
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 /* //Dump a vcd file for GTKWave.                                             */
+reg [32:0] idx;
+
 initial
  begin
  
-  $dumpfile ("shift_data_path_test.vcd");
-  $dumpvars(0, shift_data_path_test);
+  $dumpfile ("shift_76_tb.vcd");
+  $dumpvars(0, shift_76_tb);
 
+  for (idx = 0; idx < 75; idx = idx + 1) begin
+      $dumpvars(0, shift.memory[idx]);
+  end
+  
  end
 
 endmodule

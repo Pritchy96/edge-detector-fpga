@@ -2,25 +2,17 @@
 `define SETUP 1
 `define DETECTING 2
 
+`define READING 0
+`define WAITING_FOR_DATA 1
+`define SETTING_DATA 2
+`define WRITING 3
+
 module edge_detector( input  wire        clk,
                       input  wire        req,
                       output reg         ack,
                       output wire        busy,
-                      input  wire [15:0] r0,
-                      input  wire [15:0] r1,
-                      input  wire [15:0] r2,
-                      input  wire [15:0] r3,
-                      input  wire [15:0] r4,
-                      input  wire [15:0] r5,
-                      input  wire [15:0] r6,
-                      input  wire [15:0] r7,
-                      output wire        de_req,
-                      input  wire        de_ack,
-                      output wire [17:0] de_addr,
-                      output wire  [3:0] de_nbyte,
-                      output wire        de_rnw,
-                      output wire [31:0] de_w_data,
-                      input  wire [31:0] de_r_data );
+                      output reg         intial_de_req,
+                      input  wire        intial_de_ack);   
 
 //Data store
 reg  [31:0] dstore_data_in;
@@ -33,83 +25,121 @@ wire [31:0] word4;
 wire [31:0] word5;
 reg  [31:0] word_edges;
 
+reg         de_req;
+wire        de_ack;
+reg  [17:0] de_addr;
+wire [03:0] de_nbyte;
+reg         de_rnw;
+wire [31:0] de_w_data;
+wire [31:0] de_r_data;
+
 //State control
-reg [01:0] draw_state;
+reg [01:0] overall_state;
+reg [01:0] detecting_state;
 reg        more_to_draw;
 
 initial
   begin
-    draw_state   = `IDLE;
+    overall_state   = `IDLE;
+    detecting_state = `READING;
+    more_to_draw = 1;
+
     ack          = 0;
+    dstore_write_enable = 0;
+    dstore_data_in = 0;
+    de_req = 0;
+    de_addr = 0;
+    de_rnw = 0; 
   end
 
-assign busy      = (draw_state != `IDLE);
-assign de_req    = busy && ((more_to_draw != 0) || !de_ack);
+assign busy = (overall_state != `IDLE);
+// assign de_req = busy && ((more_to_draw != 0) || !de_ack);
 assign need_setup_data = (word5 === 32'hxxxxxxxx);
 
+
 always @ (posedge clk)
-  case (draw_state)
+  case (overall_state)
     `IDLE:
       begin
-			$display("State = IDLE.");
+			$display("overall_state = IDLE.");
       if (req)  //Wait for request
         begin
         ack <= 1; //Ack start
         more_to_draw <= 1;
         
-        draw_state <= `SETUP;	
+        overall_state <= `SETUP;	
         end
       end
 
     `SETUP:
       begin
-				$display("State = SETUP.");
+				$display("overall_state = SETUP.");
         //This is on the next clock after setting dstore_write_enable, so set it low.
         if (dstore_write_enable == 1) begin
           dstore_write_enable = 0;
         end
 
-        if (need_setup_data)
-          begin
-          if (de_ack) //last pixel read ack'd, start another.
+        if (need_setup_data) begin
+          if (de_req == 0 || de_ack == 1) //last pixel read ack'd, start another.
             begin
             $display("de_ack high.");
 
             //First, put the pixel word we just read into our data store.
+            dstore_data_in = dstore_data_in + 1;
             dstore_write_enable = 1;
+            //de_req = 1;
 
             //Read in data.
-            read_frame();
+            // read_frame();
             end
           end else begin
-            state <= `DETECTING;
+            intial_de_req = 1;
+            overall_state <= `DETECTING;
           end
       end
 
     `DETECTING:
       begin
-				$display("State = DETECTING.");
-
-        if (de_ack) //last pixel read/write ack'd, start another.
-          if (dstore_write_enable == 1) begin //Just wrote a pixel
-            //This is on the next clock after setting dstore_write_enable, so set it low.
-            dstore_write_enable = 0; 
-
-            //IF AT END OF FRAME BUFFER
-              //STATE = SETUP
-            //ELSE:
-              //We have written our pixel word, so now read a pixel word.
-              read_frame();
-            //END
-
-          end else begin  //Just read a pixel word, we can write a pixel word back!
-          //TODO: If we're async sending jobs to the frame store, how do we know when the read happens?
-
-            dstore_write_enable = 1;
-          end
-
+				$display("overall_state = DETECTING.");
+        edge_detecting;
       end
   endcase
+
+  task edge_detecting;
+    begin
+    case (detecting_state)
+      `READING: begin
+        $display("detecting_state = READING.");
+        //de_addr = ?;
+        de_rnw = 1;
+        de_req = 1;
+        detecting_state = `SETTING_DATA;
+      end
+
+      `WAITING_FOR_DATA: begin
+        if (de_ack == 1) begin  
+            //Data will be available next clock edge
+            detecting_state = `SETTING_DATA;
+        end
+      end
+
+      `SETTING_DATA: begin
+        //Basically this state delays the FSM by one clock cycle
+        //So the contents of dstore_data_in get written into the store
+        dstore_write_enable = 1;
+        detecting_state = `WRITING;
+      end
+
+      `WRITING: begin
+        dstore_write_enable = 0;
+        de_rnw = 0;
+        //sobel stuff here
+        //Comb logic, should be 'instant'
+        detecting_state = `READING;
+      end
+    endcase
+    end
+  endtask
 
 //TODO: Implement this.
   task read_frame;
@@ -135,15 +165,15 @@ shift_data_path data_path (.clk(clk),
                       .w5(word5));
 
 
-sobel_module sobel1 (.p0(p0),
-                    .p1(p1),
-                    .p2(p2),
-                    .p3(p3),
-                    .p5(p5),
-                    .p6(p6),
-                    .p7(p7),
-                    .p8(p8),
-                    .threshold(threshold),
-                    .result(result));
+// sobel_module sobel1 (.p0(p0),
+//                     .p1(p1),
+//                     .p2(p2),
+//                     .p3(p3),
+//                     .p5(p5),
+//                     .p6(p6),
+//                     .p7(p7),
+//                     .p8(p8),
+//                     .threshold(threshold),
+//                     .result(result));
 
 endmodule

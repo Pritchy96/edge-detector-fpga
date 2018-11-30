@@ -11,42 +11,42 @@ module shift_data_path(
 
     reg  [06:0] addr;
     wire [31:0] rd_data;
-    wire [31:0] shift_8_line_1_out;
-    wire [31:0] shift_32_line_1_out;
-    wire [31:0] shift_8_line_2_out;
-    wire [31:0] shift_32_line_2_out;
-    wire [31:0] shift_8_line_3_out;
+    wire [31:0] shift_2_line_1_out;
+    wire [31:0] shift_76_line_1_out;
+    wire [31:0] shift_2_line_2_out;
+    wire [31:0] shift_76_line_2_out;
+    wire [31:0] shift_2_line_3_out;
 
-    shift_8_multi_read shift_8_line_1 (.clk(clk),
+    shift_2 shift_2_line_1 (.clk(clk),
             .write_en(write_en),
             .data_in(data_in),
-            .data_out(shift_8_line_1_out),
+            .data_out(shift_2_line_1_out),
             .word_1(w5),
             .word_2(w4));
 
-    shift_32 shift_32_line_1 (.clk(clk),
+    shift_76 shift_76_line_1 (.clk(clk),
             .write_en(write_en),
             .addr(addr),
-            .wr_data(shift_8_line_1_out),
-            .rd_data(shift_32_line_1_out));
+            .wr_data(shift_2_line_1_out),
+            .rd_data(shift_76_line_1_out));
 
-    shift_8_multi_read shift_8_line_2 (.clk(clk),
+    shift_2 shift_2_line_2 (.clk(clk),
             .write_en(write_en),
-            .data_in(shift_32_line_1_out),
-            .data_out(shift_8_line_2_out),
+            .data_in(shift_76_line_1_out),
+            .data_out(shift_2_line_2_out),
             .word_1(w3),
             .word_2(w2));
 
-    shift_32 shift_32_line_2 (.clk(clk),
+    shift_76 shift_76_line_2 (.clk(clk),
             .write_en(write_en),
             .addr(addr),
-            .wr_data(shift_8_line_2_out),
-            .rd_data(shift_32_line_2_out));
+            .wr_data(shift_2_line_2_out),
+            .rd_data(shift_76_line_2_out));
 
-    shift_8_multi_read shift_8_line_3 (.clk(clk),
+    shift_2 shift_2_line_3 (.clk(clk),
             .write_en(write_en),
-            .data_in(shift_32_line_2_out),
-            .data_out(shift_8_line_3_out),
+            .data_in(shift_76_line_2_out),
+            .data_out(shift_2_line_3_out),
             .word_1(w1),
             .word_2(w0));
 

@@ -37,19 +37,17 @@ begin
 
   clk = 0;
   data_in = 0;
+  #20;
+  write_en = 1;
 
 	$display(file_handle, "Set up input signals.");
 end
 
 
 always @ (posedge clk) begin
-  if (write_en == 0) begin
-    write_en = 1;
-  end else begin
-    write_en = 0;
+  if (write_en) begin
+    data_in <= data_in + 1;
   end
-
-  data_in = data_in + 1;
 
 end
 

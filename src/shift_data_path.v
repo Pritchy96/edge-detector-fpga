@@ -16,6 +16,7 @@ module shift_data_path(
     wire [31:0] shift_2_line_2_out;
     wire [31:0] shift_76_line_2_out;
     wire [31:0] shift_2_line_3_out;
+    wire        shift_2_line_3_ready;
 
     shift_2 shift_2_line_1 (.clk(clk),
             .write_en(write_en),
@@ -26,7 +27,7 @@ module shift_data_path(
 
     shift_76 shift_76_line_1 (.clk(clk),
             .write_en(write_en),
-            .addr(addr),
+            .wr_addr(addr),
             .wr_data(shift_2_line_1_out),
             .rd_data(shift_76_line_1_out));
 
@@ -39,9 +40,10 @@ module shift_data_path(
 
     shift_76 shift_76_line_2 (.clk(clk),
             .write_en(write_en),
-            .addr(addr),
+            .wr_addr(addr),
             .wr_data(shift_2_line_2_out),
-            .rd_data(shift_76_line_2_out));
+            .rd_data(shift_76_line_2_out),
+            .ready(shift_2_line_3_ready));
 
     shift_2 shift_2_line_3 (.clk(clk),
             .write_en(write_en),
@@ -51,7 +53,7 @@ module shift_data_path(
             .word_2(w0));
 
     always @ (posedge clk) begin
-        if (write_en) begin
+        if (shift_2_line_3_ready && write_en) begin
             if (addr > 74) begin
                 addr = 0;
             end else begin

@@ -23,7 +23,11 @@ wire [31:0] word2;
 wire [31:0] word3;
 wire [31:0] word4;
 wire [31:0] word5;
-reg  [31:0] word_edges;
+wire [31:0] word_edges;
+
+//TODO: Define a better value for this.
+wire [07:0] threshold;
+assign threshold = 200;
 
 reg         de_req;
 wire        de_ack;
@@ -54,7 +58,7 @@ initial
 
 assign busy = (overall_state != `IDLE);
 // assign de_req = busy && ((more_to_draw != 0) || !de_ack);
-assign need_setup_data = (word5 === 32'hxxxxxxxx);
+assign need_setup_data = (word0 === 32'hxxxxxxxx);
 
 
 always @ (posedge clk)
@@ -164,16 +168,47 @@ shift_data_path data_path (.clk(clk),
                       .w4(word4),
                       .w5(word5));
 
+sobel_module sobel1 (.p0(word5[23:16]),
+                    .p1(word5[31:24]),
+                    .p2(word4[07:00]),
+                    .p3(word3[23:16]),
+                    .p5(word2[07:00]),
+                    .p6(word1[23:16]),
+                    .p7(word1[31:24]),
+                    .p8(word0[07:00]),
+                    .threshold(threshold),
+                    .result(word_edges[07:00]));
 
-// sobel_module sobel1 (.p0(p0),
-//                     .p1(p1),
-//                     .p2(p2),
-//                     .p3(p3),
-//                     .p5(p5),
-//                     .p6(p6),
-//                     .p7(p7),
-//                     .p8(p8),
-//                     .threshold(threshold),
-//                     .result(result));
+sobel_module sobel2 (.p0(word5[31:24]),
+                    .p1(word4[07:00]),
+                    .p2(word4[15:08]),
+                    .p3(word3[31:24]),
+                    .p5(word2[15:08]),
+                    .p6(word1[31:24]),
+                    .p7(word1[07:00]),
+                    .p8(word0[15:08]),
+                    .threshold(threshold),
+                    .result(word_edges[15:08]));
 
+sobel_module sobel3 (.p0(word4[07:00]),
+                     .p1(word4[15:08]),
+                     .p2(word4[23:16]),
+                     .p3(word3[07:00]),
+                     .p5(word2[23:16]),
+                     .p6(word1[07:00]),
+                     .p7(word1[15:08]),
+                     .p8(word0[23:16]),
+                     .threshold(threshold),
+                     .result(word_edges[23:16]));
+
+sobel_module sobel4 (.p0(word4[15:08]),
+                     .p1(word4[23:16]),
+                     .p2(word4[31:24]),
+                     .p3(word3[15:08]),
+                     .p5(word2[31:24]),
+                     .p6(word1[15:08]),
+                     .p7(word1[23:16]),
+                     .p8(word0[31:24]),
+                     .threshold(threshold),
+                     .result(word_edges[31:24]));
 endmodule

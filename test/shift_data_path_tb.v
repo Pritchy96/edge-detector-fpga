@@ -43,11 +43,7 @@ end
 
 
 always @ (posedge clk) begin
-  if (write_en == 0) begin
-    write_en = 1;
-  end else begin
-    write_en = 0;
-  end
+  write_en = 1;
 
   data_in = data_in + 1;
 

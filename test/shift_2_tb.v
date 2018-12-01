@@ -40,9 +40,8 @@ end
 
 always @ (posedge clk) begin
   // write_en = 0;
-  #10
   data_in = data_in + 1;
-  // write_en = 1;
+  write_en = 1;
 end
 
 

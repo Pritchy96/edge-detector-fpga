@@ -11,14 +11,16 @@ reg         write_en;
 reg  [06:0] addr;
 reg  [31:0] wr_data;
 wire [31:0] rd_data;
+wire        ready;
 
 
 //Instantiate module under test
 shift_76 shift (.clk(clk),
                 .write_en(write_en),
-                .addr(addr),
+                .wr_addr(addr),
                 .wr_data(wr_data),
-                .rd_data(rd_data));
+                .rd_data(rd_data),
+                .ready(ready));
 
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
@@ -37,20 +39,32 @@ begin
 	$display(file_handle, "Set up input signals.");
 end
 
+//Add some delays to test write_en
+initial begin
+//  #100
+//  write_en = 0;
+//  #450
+//  write_en = 1;
+end
 
+//Increment address if we can write.
+//Should this be inside shift_76??
 always @ (posedge clk) begin
-  // write_en = 0;
-  #10
 
-  if (addr > 71) begin
-    addr = 0;
-  end else begin
-    addr = addr + 1;
+ if (write_en && ready) begin
+
+    if (addr > 71) begin
+      addr = 0;
+    end else begin
+      addr = addr + 1;
+    end
+
+    wr_data = wr_data + 1;
   end
 
-  wr_data = wr_data + 1;
-  write_en = 1;
 end
+
+
 
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/

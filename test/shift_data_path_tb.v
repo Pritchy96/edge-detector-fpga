@@ -48,7 +48,6 @@ always @ (posedge clk) begin
   if (write_en) begin
     data_in <= data_in + 1;
   end
-
 end
 
 

@@ -12,14 +12,15 @@ module shift_data_path(
     reg  [06:0] addr;
     wire [31:0] rd_data;
     reg         datastore_write_en;
+  
     wire [31:0] shift_2_line_1_out;
     wire [31:0] shift_76_line_1_out;
     wire [31:0] shift_2_line_2_out;
     wire [31:0] shift_76_line_2_out;
     wire [31:0] shift_2_line_3_out;
+  
     wire        shift_76_line_1_ready;
     wire        shift_76_line_2_ready;
-
 
     shift_2 shift_2_line_1 (.clk(clk),
             .write_en(datastore_write_en),

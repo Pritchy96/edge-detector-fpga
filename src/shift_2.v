@@ -7,7 +7,6 @@ module shift_2 (input  wire        write_en,
                 );
 
     always @ (negedge clk) begin
-        
         if (write_en) begin
             data_out <= word_2;
             word_2 <= word_1;

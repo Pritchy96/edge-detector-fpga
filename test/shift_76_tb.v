@@ -52,16 +52,13 @@ end
 always @ (posedge clk) begin
 
  if (write_en) begin
-
      if (addr > 77) begin
       addr <= 0;
     end else begin
       addr <= addr + 1;
     end
-
     wr_data <= wr_data + 1;
   end
-
 end
 
 

@@ -43,9 +43,9 @@ end
 
 
 always @ (posedge clk) begin
-  write_en = 1;
 
-  data_in = data_in + 1;
+  data_in <= data_in + 1;
+  write_en <= 1;
 
 end
 
@@ -71,6 +71,7 @@ initial
  begin
   $dumpfile ("shift_data_path_tb.vcd");
   $dumpvars(0, shift_data_path_tb);
+  $dumpvars(0, shift_data_path_tb.data_path.shift_2_line_1);
  end
 
 endmodule

@@ -16,7 +16,8 @@ module shift_data_path(
     wire [31:0] shift_2_line_2_out;
     wire [31:0] shift_76_line_2_out;
     wire [31:0] shift_2_line_3_out;
-    wire        shift_2_line_3_ready;
+    wire        shift_76_line_1_ready;
+    wire        shift_76_line_2_ready;
 
     shift_2 shift_2_line_1 (.clk(clk),
             .write_en(write_en),
@@ -29,7 +30,8 @@ module shift_data_path(
             .write_en(write_en),
             .wr_addr(addr),
             .wr_data(shift_2_line_1_out),
-            .rd_data(shift_76_line_1_out));
+            .rd_data(shift_76_line_1_out),
+            .ready(shift_76_line_1_ready));
 
     shift_2 shift_2_line_2 (.clk(clk),
             .write_en(write_en),
@@ -43,7 +45,7 @@ module shift_data_path(
             .wr_addr(addr),
             .wr_data(shift_2_line_2_out),
             .rd_data(shift_76_line_2_out),
-            .ready(shift_2_line_3_ready));
+            .ready(shift_76_line_2_ready));
 
     shift_2 shift_2_line_3 (.clk(clk),
             .write_en(write_en),
@@ -53,7 +55,7 @@ module shift_data_path(
             .word_2(w0));
 
     always @ (posedge clk) begin
-        if (shift_2_line_3_ready && write_en) begin
+        if ( write_en) begin
             if (addr > 74) begin
                 addr = 0;
             end else begin
@@ -65,4 +67,22 @@ module shift_data_path(
     initial begin
         addr = 0;
     end
+
+
+    /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+    /* //Dump a vcd file for GTKWave.                                             */
+    reg [32:0] idx;
+
+    initial
+    begin
+    
+    //$dumpfile ("shift_76_tb.vcd");
+    $dumpvars(0, shift_76_line_1);
+
+    for (idx = 0; idx < 75; idx = idx + 1) begin
+        $dumpvars(0, shift_76_line_1.memory[idx]);
+    end
+    
+    end
+
 endmodule

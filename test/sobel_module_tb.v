@@ -6,6 +6,7 @@ module sobel_module_tb ();
 
 integer file_handle;
 
+reg        clk;
 reg  [7:0] p0;
 reg  [7:0] p1;
 reg  [7:0] p2;
@@ -39,19 +40,39 @@ begin
   file_handle = $fopen("sobel_module_tb_out.log"); // Open a message output file
   $fdisplay(file_handle, "Outcome from Sobel Module tests\n"); // Output title
   
-  p0 = 8'h1E;
-  p1 = 8'h35;
-  p2 = 8'hAE;
-  p3 = 8'h01;
-  p5 = 8'hFF;
+  clk = 0;
+  p0 = 8'h00;
+  p1 = 8'h00;
+  p2 = 8'h00;
+  p3 = 8'h00;
+  p5 = 8'h00;
   p6 = 8'h00;
-  p7 = 8'h1F;
-  p8 = 8'hFF;
-  threshold = 200;
+  p7 = 8'h00;
+  p8 = 8'h00;
+  threshold = 8'h00;
 
 	$display(file_handle, "Set up input signals.");
 end
 
+
+always @ (posedge clk) begin
+  #30;
+  p0 = $urandom%128;
+  p1 = $urandom%128;
+  p2 = $urandom%128;
+  p3 = $urandom%128;
+  p5 = $urandom%128;
+  p6 = $urandom%128;
+  p7 = $urandom%128;
+  p8 = $urandom%128;
+  threshold = $urandom%128;
+end
+
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+/* Set up clock input																						              */
+always #10 clk = ~clk;
 
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/

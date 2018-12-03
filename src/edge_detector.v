@@ -89,8 +89,8 @@ always @ (posedge clk)
             $display("de_ack high.");
 
             //First, put the pixel word we just read into our data store.
-            dstore_data_in = dstore_data_in + 1;
-            dstore_write_enable = 1;
+            dstore_data_in <= dstore_data_in + 1;
+            dstore_write_enable <= 1;
             //de_req = 1;
 
             //Read in data.
@@ -117,14 +117,17 @@ always @ (posedge clk)
         //de_addr = ?;
         de_rnw = 1;
         de_req = 1;
-        detecting_state = `SETTING_DATA;
+        detecting_state = `WAITING_FOR_DATA;
       end
 
-      `WAITING_FOR_DATA: begin
-        if (de_ack == 1) begin  
+      `WAITING_FOR_DATA: begin 
+        // if (de_ack == 1) begin  //TODO: Readd this when plugged into the framestore.
+          #200
             //Data will be available next clock edge
+            dstore_data_in = dstore_data_in + 1;
+
             detecting_state = `SETTING_DATA;
-        end
+        // end
       end
 
       `SETTING_DATA: begin

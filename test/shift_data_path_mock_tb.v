@@ -60,8 +60,11 @@ begin
   clk = 0;
   addr = 0;
   data_in = 0;
-  write_en = 1;
   datastore_write_en = 0;
+
+  #100
+  write_en = 1;
+
 
 	$display(file_handle, "Set up input signals.");
 end
@@ -78,14 +81,14 @@ end
 //Should this be inside shift_76??
 always @ (posedge clk) begin
   if (write_en) begin
-      if (addr > 71) begin
+      if (addr >= 77) begin
         addr <= 0;
       end else begin
         addr <= addr + 1;
       end
 
       data_in <= data_in + 1;
-      datastore_write_en = 1;
+      datastore_write_en <= 1;
     end else begin
       datastore_write_en <= 0;
     end
@@ -124,7 +127,7 @@ initial
   $dumpfile ("shift_data_path_mock_tb..vcd");
   $dumpvars(0, shift_data_path_mock_tb);
 
-  for (idx = 0; idx < 75; idx = idx + 1) begin
+  for (idx = 0; idx < 78; idx = idx + 1) begin
       $dumpvars(0, shift.memory[idx]);
   end
   

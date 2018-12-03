@@ -5,10 +5,10 @@ module shift_76(input  wire        write_en,
                 output reg  [31:0] rd_data,
                 output reg         ready);
     
-    reg  [31:0] memory [75:0];
+    reg  [31:0] memory [77:0];
     wire [6:0] rd_addr;
 
-    assign rd_addr = (wr_addr == 72) ? 0 : wr_addr + 1; //TODO: Needed?
+    assign rd_addr = ((wr_addr + 1) > 77) ? 0 : wr_addr + 1; //TODO: Needed?
 
     initial begin
         ready = 1;

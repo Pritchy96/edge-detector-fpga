@@ -37,15 +37,17 @@ begin
 
   clk = 0;
   data_in = 0;
+  #20;
+  write_en = 1;
 
 	$display(file_handle, "Set up input signals.");
 end
 
 
 always @ (posedge clk) begin
-
-  data_in <= data_in + 1;
-  write_en <= 1;
+  if (write_en) begin
+    data_in <= data_in + 1;
+  end
 
 end
 
@@ -71,7 +73,6 @@ initial
  begin
   $dumpfile ("shift_data_path_tb.vcd");
   $dumpvars(0, shift_data_path_tb);
-  $dumpvars(0, shift_data_path_tb.data_path.shift_2_line_1);
  end
 
 endmodule

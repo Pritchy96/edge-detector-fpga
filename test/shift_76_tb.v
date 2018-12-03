@@ -41,25 +41,25 @@ end
 
 //Add some delays to test write_en
 initial begin
-//  #100
-//  write_en = 0;
-//  #450
-//  write_en = 1;
+ #100
+ write_en = 0;
+ #450
+ write_en = 1;
 end
 
 //Increment address if we can write.
 //Should this be inside shift_76??
 always @ (posedge clk) begin
 
- if (write_en && ready) begin
+ if (write_en) begin
 
-    if (addr > 71) begin
-      addr = 0;
+     if (addr > 77) begin
+      addr <= 0;
     end else begin
-      addr = addr + 1;
+      addr <= addr + 1;
     end
 
-    wr_data = wr_data + 1;
+    wr_data <= wr_data + 1;
   end
 
 end
@@ -92,7 +92,7 @@ initial
   $dumpfile ("shift_76_tb.vcd");
   $dumpvars(0, shift_76_tb);
 
-  for (idx = 0; idx < 75; idx = idx + 1) begin
+  for (idx = 0; idx < 78; idx = idx + 1) begin
       $dumpvars(0, shift.memory[idx]);
   end
   

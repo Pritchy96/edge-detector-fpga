@@ -27,7 +27,7 @@ wire [31:0] word_edges;
 
 //TODO: Define a better value for this.
 wire [07:0] threshold;
-assign threshold = 200;
+assign threshold = 10;
 
 reg         de_req;
 wire        de_ack;
@@ -89,8 +89,8 @@ always @ (posedge clk)
             $display("de_ack high.");
 
             //First, put the pixel word we just read into our data store.
-            dstore_data_in = dstore_data_in + 1;
-            dstore_write_enable = 1;
+            dstore_data_in = $random%128;
+            dstore_write_enable = 1;  //TODO: Add wait logic.
             //de_req = 1;
 
             //Read in data.
@@ -117,21 +117,24 @@ always @ (posedge clk)
         //de_addr = ?;
         de_rnw = 1;
         de_req = 1;
-        detecting_state = `SETTING_DATA;
+        detecting_state = `WAITING_FOR_DATA;
       end
 
-      `WAITING_FOR_DATA: begin
-        if (de_ack == 1) begin  
+      `WAITING_FOR_DATA: begin 
+        // if (de_ack == 1) begin  //TODO: Readd this when plugged into the framestore.
+          #200
             //Data will be available next clock edge
+            read_frame;
+
             detecting_state = `SETTING_DATA;
-        end
+        // end
       end
 
       `SETTING_DATA: begin
         //Basically this state delays the FSM by one clock cycle
         //So the contents of dstore_data_in get written into the store
         dstore_write_enable = 1;
-        detecting_state = `WRITING;
+        detecting_state <= `WRITING;
       end
 
       `WRITING: begin
@@ -139,7 +142,7 @@ always @ (posedge clk)
         de_rnw = 0;
         //sobel stuff here
         //Comb logic, should be 'instant'
-        detecting_state = `READING;
+        detecting_state <= `READING;
       end
     endcase
     end
@@ -150,11 +153,13 @@ always @ (posedge clk)
     begin
 
 		$display("Reading Frame.. Honest!");
-    // dstore_data_in = dstore_data_in + 1;
-
-    // Set RNW = 1
     // Set de_addr = addr?
-    // read data...somehow..
+    //Temp for testing
+    // dstore_data_in = dstore_data_in + 1; //Better for visualising data flow.
+    dstore_data_in = $random%128; //Better for visualising data flow.
+    de_rnw = 0;
+    
+    
     end
   endtask
 

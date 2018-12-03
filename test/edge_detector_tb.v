@@ -68,7 +68,9 @@ initial
 initial
  begin
   $dumpfile ("edge_detector_tb.vcd");
-  $dumpvars(0, edge_detector_tb);
+  $dumpvars(2000, edge_detector_tb);
+
+  
  end
 
 endmodule

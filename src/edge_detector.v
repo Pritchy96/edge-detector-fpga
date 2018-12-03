@@ -27,7 +27,7 @@ wire [31:0] word_edges;
 
 //TODO: Define a better value for this.
 wire [07:0] threshold;
-assign threshold = 200;
+assign threshold = 10;
 
 reg         de_req;
 wire        de_ack;

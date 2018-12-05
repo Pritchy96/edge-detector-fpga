@@ -38,16 +38,19 @@ wire [31:0] de_w_data;
 wire [31:0] de_r_data;
 
 //State control
-reg [01:0] overall_state;
+reg [01:0] setup_state;
 reg [01:0] detecting_state;
+reg [01:0] overall_state;
+
 reg        more_to_draw;
 
 initial
   begin
+    //Initialise Control Signals.
     overall_state   = `IDLE;
+    setup_state     = `READING;
     detecting_state = `READING;
     more_to_draw = 1;
-
     ack          = 0;
     dstore_write_enable = 0;
     dstore_data_in = 0;
@@ -65,55 +68,28 @@ always @ (posedge clk)
   case (overall_state)
     `IDLE:
       begin
-			$display("overall_state = IDLE.");
       if (req)  //Wait for request
         begin
         ack <= 1; //Ack start
         more_to_draw <= 1;
         
-        overall_state <= `SETUP;	
+        overall_state <= `SETUP;
         end
       end
 
-    `SETUP:
-      begin
-				$display("overall_state = SETUP.");
-        //This is on the next clock after setting dstore_write_enable, so set it low.
-        if (dstore_write_enable == 1) begin
-          dstore_write_enable = 0;
-        end
+    `SETUP: begin
+      handle_setup;
+    end
 
-        if (need_setup_data) begin
-          if (de_req == 0 || de_ack == 1) //last pixel read ack'd, start another.
-            begin
-            $display("de_ack high.");
-
-            //First, put the pixel word we just read into our data store.
-            dstore_data_in = $random%128;
-            dstore_write_enable = 1;  //TODO: Add wait logic.
-            //de_req = 1;
-
-            //Read in data.
-            // read_frame();
-            end
-          end else begin
-            intial_de_req = 1;
-            overall_state <= `DETECTING;
-          end
-      end
-
-    `DETECTING:
-      begin
-				$display("overall_state = DETECTING.");
-        edge_detecting;
-      end
+    `DETECTING: begin
+      edge_detecting;
+    end
   endcase
 
   task edge_detecting;
     begin
     case (detecting_state)
       `READING: begin
-        $display("detecting_state = READING.");
         //de_addr = ?;
         de_rnw = 1;
         de_req = 1;
@@ -122,7 +98,7 @@ always @ (posedge clk)
 
       `WAITING_FOR_DATA: begin 
         // if (de_ack == 1) begin  //TODO: Readd this when plugged into the framestore.
-          #200
+          #20
             //Data will be available next clock edge
             read_frame;
 
@@ -140,7 +116,6 @@ always @ (posedge clk)
       `WRITING: begin
         dstore_write_enable = 0;
         de_rnw = 0;
-        //sobel stuff here
         //Comb logic, should be 'instant'
         detecting_state <= `READING;
       end
@@ -148,18 +123,47 @@ always @ (posedge clk)
     end
   endtask
 
-//TODO: Implement this.
+  task handle_setup;
+    case (setup_state)
+    `READING: begin
+      dstore_write_enable = 0;
+
+      if (need_setup_data) begin
+          //de_addr = ?;
+          de_rnw = 1;
+          de_req = 1;
+          setup_state = `WAITING_FOR_DATA;
+      end else begin
+          intial_de_req = 1;
+          overall_state <= `DETECTING;
+      end
+    end
+
+    `WAITING_FOR_DATA: begin 
+      // if (de_ack == 1) begin  //TODO: Readd this when plugged into the framestore.
+          #20
+          //Data will be available next clock edge
+          read_frame;
+          setup_state = `SETTING_DATA;
+      // end
+    end
+
+    `SETTING_DATA: begin
+      //Basically this state delays the FSM by one clock cycle
+      //So the contents of dstore_data_in get written into the store
+      dstore_write_enable <= 1;
+      setup_state <= `READING;
+    end
+    endcase
+  endtask
+
   task read_frame;
     begin
-
-		$display("Reading Frame.. Honest!");
     // Set de_addr = addr?
     //Temp for testing
-    // dstore_data_in = dstore_data_in + 1; //Better for visualising data flow.
-    dstore_data_in = $random%128; //Better for visualising data flow.
+    dstore_data_in = dstore_data_in + 1; //Better for visualising data flow.
+    // dstore_data_in = $random%128; //Better for visualising data flow.
     de_rnw = 0;
-    
-    
     end
   endtask
 

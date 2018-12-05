@@ -11,8 +11,21 @@ module edge_detector( input  wire        clk,
                       input  wire        req,
                       output reg         ack,
                       output wire        busy,
-                      output reg         intial_de_req,
-                      input  wire        intial_de_ack);   
+                      input  wire [15:0] r0,
+                      input  wire [15:0] r1,
+                      input  wire [15:0] r2,
+                      input  wire [15:0] r3,
+                      input  wire [15:0] r4,
+                      input  wire [15:0] r5,
+                      input  wire [15:0] r6,
+                      input  wire [15:0] r7,
+                      output reg         de_req,
+                      input  wire        de_ack,
+                      output reg  [17:0] de_addr,
+                      output reg   [3:0] de_nbyte,
+                      output reg         de_rnw,
+                      output reg  [31:0] de_w_data,
+                      input  wire [31:0] de_r_data );
 
 //Data store
 reg  [31:0] dstore_data_in;
@@ -29,20 +42,15 @@ wire [31:0] word_edges;
 wire [07:0] threshold;
 assign threshold = 10;
 
-reg         de_req;
-wire        de_ack;
-reg  [17:0] de_addr;
-wire [03:0] de_nbyte;
-reg         de_rnw;
-wire [31:0] de_w_data;
-wire [31:0] de_r_data;
+reg         internal_de_req;
+wire        internal_de_ack;
 
 //State control
-reg [01:0] setup_state;
-reg [01:0] detecting_state;
 reg [01:0] overall_state;
-
+reg [01:0] detecting_state;
+reg [01:0] setup_state;
 reg        more_to_draw;
+
 
 initial
   begin
@@ -54,13 +62,13 @@ initial
     ack          = 0;
     dstore_write_enable = 0;
     dstore_data_in = 0;
-    de_req = 0;
+    internal_de_req = 0;
     de_addr = 0;
-    de_rnw = 0; 
+    de_rnw = 0;
   end
 
 assign busy = (overall_state != `IDLE);
-// assign de_req = busy && ((more_to_draw != 0) || !de_ack);
+// assign internal_de_req = busy && ((more_to_draw != 0) || !internal_de_ack);
 assign need_setup_data = (word0 === 32'hxxxxxxxx);
 
 
@@ -72,7 +80,7 @@ always @ (posedge clk)
         begin
         ack <= 1; //Ack start
         more_to_draw <= 1;
-        
+
         overall_state <= `SETUP;
         end
       end
@@ -92,12 +100,12 @@ always @ (posedge clk)
       `READING: begin
         //de_addr = ?;
         de_rnw = 1;
-        de_req = 1;
+        internal_de_req = 1;
         detecting_state = `WAITING_FOR_DATA;
       end
 
-      `WAITING_FOR_DATA: begin 
-        // if (de_ack == 1) begin  //TODO: Readd this when plugged into the framestore.
+      `WAITING_FOR_DATA: begin
+        // if (internal_de_ack == 1) begin  //TODO: Readd this when plugged into the framestore.
           #20
             //Data will be available next clock edge
             read_frame;
@@ -131,16 +139,16 @@ always @ (posedge clk)
       if (need_setup_data) begin
           //de_addr = ?;
           de_rnw = 1;
-          de_req = 1;
+          internal_de_req = 1;
           setup_state = `WAITING_FOR_DATA;
       end else begin
-          intial_de_req = 1;
+          de_req = 1;
           overall_state <= `DETECTING;
       end
     end
 
-    `WAITING_FOR_DATA: begin 
-      // if (de_ack == 1) begin  //TODO: Readd this when plugged into the framestore.
+    `WAITING_FOR_DATA: begin
+      // if (internal_de_ack == 1) begin  //TODO: Readd this when plugged into the framestore.
           #20
           //Data will be available next clock edge
           read_frame;
